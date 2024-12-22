@@ -2,18 +2,18 @@
 
 import mysql from 'mysql2/promise'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 
 export async function createConnection() {
   try {
     const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME
+      host: 'localhost',
+      user: 'root',
+      password: '',
+      database: 'usedpartshub'
     })
     return connection
   } catch (error) {
-    console.error('Database connection error:', error)
     return null
   }
 }
@@ -21,17 +21,16 @@ export async function createConnection() {
 export async function queryDB(query: string, params: any[] = []): Promise<{ data?: any; error?: string }> {
   const connection = await createConnection()
   if (!connection) {
-    return { error: 'Datenbankverbindung konnte nicht hergestellt werden' }
+    return { error: 'Datenbankverbindung konnte nicht hergestellt werden. Bitte versuchen Sie es später erneut.' }
   }
 
   try {
-    const [results] = await connection.execute(query, params) as [any[], mysql.FieldPacket[]];
+    const [results] = await connection.execute(query, params)
     await connection.end()
     return { data: results }
   } catch (error) {
-    console.error('Database query error:', error)
     await connection.end()
-    return { error: 'Datenbankfehler aufgetreten' }
+    return { error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' }
   }
 }
 
